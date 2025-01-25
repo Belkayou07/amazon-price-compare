@@ -1,13 +1,14 @@
-.price-comparison-container {
+#az-price-comparison {
     margin: 20px 0;
     padding: 15px;
     border: 1px solid #e7e7e7;
     border-radius: 8px;
     background-color: #f8f8f8;
     max-width: 500px;
+    font-family: Arial, sans-serif;
 }
 
-.price-comparison-container h3 {
+#az-price-comparison h3 {
     margin: 0 0 10px 0;
     color: #232f3e;
     font-size: 16px;
@@ -52,4 +53,18 @@
 #marketplace-prices li:first-child a {
     color: #007600;
     font-weight: bold;
+}
+
+/* Loading state */
+.loading-prices {
+    text-align: center;
+    padding: 20px;
+    color: #666;
+}
+
+/* Error state */
+.price-error {
+    color: #c40000;
+    font-size: 12px;
+    margin-top: 5px;
 }

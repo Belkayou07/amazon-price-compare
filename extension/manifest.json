@@ -5,7 +5,9 @@
   "description": "Compare product prices across different marketplaces",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "scripting",
+    "webRequest"
   ],
   "host_permissions": [
     "*://*.amazon.com/*",
@@ -15,8 +17,7 @@
     "*://*.amazon.it/*",
     "*://*.amazon.es/*",
     "*://*.amazon.nl/*",
-    "https://webservices.amazon.com/*",
-    "https://v6.exchangerate-api.com/*"
+    "https://api.exchangerate-api.com/*"
   ],
   "background": {
     "service_worker": "background.js"
