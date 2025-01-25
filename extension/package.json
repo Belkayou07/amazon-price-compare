@@ -1,7 +1,7 @@
 {
-  "name": "amazon-price-comparison",
+  "name": "az-price-comparison",
   "version": "1.0.0",
-  "description": "Chrome extension to compare Amazon prices across marketplaces",
+  "description": "Chrome extension to compare prices across marketplaces",
   "main": "background.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

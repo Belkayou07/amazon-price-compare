@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Amazon Price Comparison",
+  "name": "AZ Price Comparison",
   "version": "1.0",
-  "description": "Compare product prices across different Amazon marketplaces",
+  "description": "Compare product prices across different marketplaces",
   "permissions": [
     "storage",
     "activeTab"
