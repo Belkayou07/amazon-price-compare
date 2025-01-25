@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Amazon Price Comparison",
+  "version": "1.0",
+  "description": "Compare product prices across different Amazon marketplaces",
+  "permissions": [
+    "storage",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "*://*.amazon.com/*",
+    "*://*.amazon.co.uk/*",
+    "*://*.amazon.de/*",
+    "*://*.amazon.fr/*",
+    "*://*.amazon.it/*",
+    "*://*.amazon.es/*",
+    "*://*.amazon.nl/*",
+    "https://webservices.amazon.com/*",
+    "https://v6.exchangerate-api.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.amazon.*/dp/*", "*://*.amazon.*/gp/product/*"],
+      "js": ["config.js", "content.js"],
+      "css": ["styles.css"]
+    }
+  ],
+  "icons": {
+    "48": "icon48.png",
+    "128": "icon128.png"
+  }
+}
