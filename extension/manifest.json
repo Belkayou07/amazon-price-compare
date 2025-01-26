@@ -24,13 +24,17 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://*.amazon.*/dp/*", "*://*.amazon.*/gp/product/*"],
-      "js": ["config.js", "content.js"],
+      "matches": [
+        "*://*.amazon.com/*",
+        "*://*.amazon.co.uk/*",
+        "*://*.amazon.de/*",
+        "*://*.amazon.fr/*",
+        "*://*.amazon.it/*",
+        "*://*.amazon.es/*",
+        "*://*.amazon.nl/*"
+      ],
+      "js": ["config.test.js", "content.js"],
       "css": ["styles.css"]
     }
-  ],
-  "icons": {
-    "48": "icon48.png",
-    "128": "icon128.png"
-  }
+  ]
 }

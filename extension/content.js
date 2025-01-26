@@ -22,27 +22,6 @@ function getCurrentMarketplace() {
     return MARKETPLACES.find(m => hostname.includes(m.domain));
 }
 
-// Function to extract price from Amazon page
-function extractPrice(doc) {
-    const priceElements = [
-        '.a-price .a-offscreen',
-        '#priceblock_ourprice',
-        '#priceblock_dealprice',
-        '.a-price-whole'
-    ];
-
-    for (const selector of priceElements) {
-        const element = doc.querySelector(selector);
-        if (element) {
-            const price = element.textContent
-                .replace(/[^0-9.,]/g, '')
-                .replace(',', '.');
-            return parseFloat(price);
-        }
-    }
-    return null;
-}
-
 // Function to create comparison container
 function createComparisonContainer() {
     const priceElement = document.querySelector('.a-price');
@@ -60,6 +39,12 @@ function createComparisonContainer() {
     list.id = 'marketplace-prices';
     container.appendChild(list);
 
+    // Add loading message
+    const loading = document.createElement('div');
+    loading.className = 'loading-prices';
+    loading.textContent = 'Fetching prices...';
+    container.appendChild(loading);
+
     priceElement.parentElement.insertAdjacentElement('afterend', container);
     return container;
 }
@@ -67,7 +52,13 @@ function createComparisonContainer() {
 // Function to display prices
 function displayPrices(prices) {
     const list = document.getElementById('marketplace-prices');
+    const loading = document.querySelector('.loading-prices');
     if (!list) return;
+
+    // Remove loading message
+    if (loading) {
+        loading.remove();
+    }
 
     list.innerHTML = '';
     prices.forEach(price => {
@@ -94,37 +85,56 @@ function displayPrices(prices) {
 async function fetchMarketplacePrice(marketplace, asin) {
     try {
         const url = `https://${marketplace.domain}/dp/${asin}`;
-        const response = await fetch(url);
-        const text = await response.text();
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-        const price = extractPrice(doc);
-        
-        return {
-            marketplace: marketplace.domain,
-            price: price,
-            currency: marketplace.currency,
+        const response = await chrome.runtime.sendMessage({
+            action: 'fetchPrice',
             url: url
-        };
+        });
+        
+        if (response.success) {
+            return {
+                marketplace: marketplace.domain,
+                price: response.price,
+                currency: marketplace.currency,
+                url: url
+            };
+        } else {
+            console.error(`Error fetching price from ${marketplace.domain}:`, response.error);
+            return {
+                marketplace: marketplace.domain,
+                price: null,
+                currency: marketplace.currency,
+                url: url
+            };
+        }
     } catch (error) {
         console.error(`Error fetching price from ${marketplace.domain}:`, error);
         return {
             marketplace: marketplace.domain,
             price: null,
             currency: marketplace.currency,
-            url: `https://${marketplace.domain}/dp/${asin}`
+            url: url
         };
     }
 }
 
-// Function to convert currency
+// Function to convert currency using background script
 async function convertCurrency(amount, fromCurrency, toCurrency) {
     if (fromCurrency === toCurrency) return amount;
     
     try {
-        const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);
-        const data = await response.json();
-        return amount * data.rates[toCurrency];
+        const response = await chrome.runtime.sendMessage({
+            action: 'convertCurrency',
+            amount: amount,
+            from: fromCurrency,
+            to: toCurrency
+        });
+        
+        if (response.success) {
+            return response.amount;
+        } else {
+            console.error('Error converting currency:', response.error);
+            return null;
+        }
     } catch (error) {
         console.error('Error converting currency:', error);
         return null;
@@ -153,6 +163,7 @@ async function initPriceComparison() {
         // Display cached data if less than 1 hour old
         if (cacheAge < 60 * 60 * 1000) {
             displayPrices(data.prices);
+            return;
         }
     }
 
@@ -200,11 +211,22 @@ async function initPriceComparison() {
         });
     } catch (error) {
         console.error('Error in price comparison:', error);
+        const container = document.getElementById('az-price-comparison');
+        if (container) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'price-error';
+            errorDiv.textContent = 'Error fetching prices. Please try again later.';
+            container.appendChild(errorDiv);
+        }
     }
 }
 
 // Initialize when page loads
-document.addEventListener('DOMContentLoaded', initPriceComparison);
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPriceComparison);
+} else {
+    initPriceComparison();
+}
 
 // Also check for dynamic page updates
 const observer = new MutationObserver(() => {
